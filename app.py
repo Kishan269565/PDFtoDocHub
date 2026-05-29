@@ -90,19 +90,32 @@ def pdf_to_word(pdf_path, out_path):
 
 
 def word_to_pdf(docx_path, out_path):
-    lo = shutil.which("libreoffice") or shutil.which("soffice")
-    if not lo:
-        raise EnvironmentError("LibreOffice not installed on this server.")
+    # Search all possible LibreOffice locations
+    lo = (
+        shutil.which("libreoffice") or
+        shutil.which("soffice") or
+        shutil.which("libreoffice7.6") or
+        "/usr/bin/libreoffice" if os.path.exists("/usr/bin/libreoffice") else None or
+        "/usr/bin/soffice"     if os.path.exists("/usr/bin/soffice")     else None or
+        "/nix/var/nix/profiles/default/bin/libreoffice"
+    )
+
+    if not lo or not os.path.exists(lo):
+        raise EnvironmentError(
+            "LibreOffice not found. Make sure nixpacks.toml has: nixPkgs = [\"libreoffice\"]"
+        )
+
     out_dir = os.path.dirname(os.path.abspath(out_path))
     result  = subprocess.run(
         [lo, "--headless", "--convert-to", "pdf", "--outdir", out_dir, docx_path],
-        capture_output=True, text=True
+        capture_output=True, text=True, timeout=60
     )
     if result.returncode != 0:
-        raise RuntimeError(result.stderr)
+        raise RuntimeError(result.stderr or "LibreOffice conversion failed")
+
     base   = os.path.splitext(os.path.basename(docx_path))[0]
     lo_pdf = os.path.join(out_dir, base + ".pdf")
-    if lo_pdf != out_path and os.path.exists(lo_pdf):
+    if os.path.abspath(lo_pdf) != os.path.abspath(out_path) and os.path.exists(lo_pdf):
         shutil.move(lo_pdf, out_path)
 
 
