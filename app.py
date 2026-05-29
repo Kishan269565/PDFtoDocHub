@@ -122,6 +122,10 @@ def word_to_pdf(docx_path, out_path):
 def index():
     return render_template("index.html")
 
+@app.route("/google18b915e99fc3a4f7.html")
+def google_verify():
+    return send_file("static/google18b915e99fc3a4f7.html")
+
 @app.route("/convert", methods=["POST"])
 def convert():
     if "file" not in request.files:
