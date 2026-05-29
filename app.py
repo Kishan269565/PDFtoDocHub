@@ -10,9 +10,6 @@ from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-@app.route('/google1234abcd.html')
-def google_verify():
-    return send_file('static/google1234abcd.html')
     
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB limit
